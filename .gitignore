@@ -1,0 +1,6 @@
+*.o
+*.hi
+*.swp
+*.tmp
+.DS_Store
+dist/
