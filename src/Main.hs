@@ -1,3 +1,4 @@
+{-# LANGUAGE NamedFieldPuns #-}
 module Main where
 
 import System.Random
@@ -25,39 +26,44 @@ type Hangman a = StateT GameState IO a
 --      image from Yahoo! images; get the URL and put it into an ASCII-art
 --      webservice to convert it into ASCII characters. Present the output to
 --      the user to make them recognise what is in the picture.
-data GameResult = Won | Lost | NotWon
 
-data GameState = GameState {
-  theWord  :: String,          -- should be in Reader
-  guesses  :: [Char],          -- which characters have been guessed
-  lives    :: Int,
-  maxLives :: Int              -- the number of lives at the beginning.
-}
+data GameState = GameState
+  { theWord  :: String     -- TODO should be in Reader monad
+  , guesses  :: [Char]     -- which characters have been guessed
+  , lives    :: Int
+  , maxLives :: Int        -- the number of lives at the beginning.
+  }
 
 instance Show GameState where
-  show (GameState {theWord=word,guesses=chrs,lives=ls,maxLives=mls}) =
-    let mysteryWord = map (replaceWith chrs '_') word;
-        used  = "Guessed: {" ++ chrs ++ "}";
-        lives = "Lives:   [" ++ replicate ls 'I' ++ "]"
-        wordToUsed  = 15 - length mysteryWord
-        usedToLives = 14 - length chrs
+  show (GameState {theWord,guesses,lives,maxLives}) =
+    let wordIndicator = map (replaceWith guesses '_') theWord;
+        usedIndicator  = "Guessed: {" ++ guesses ++ "}";
+        livesIndicator = "Lives:   [" ++ replicate lives 'I' ++ "]"
+        spacesFromWordToUsed  = 15 - length wordIndicator
+        spacesFromUsedToLives = 14 - length guesses
         spaces = "      "
-    in spaces ++ mysteryWord ++ replicate wordToUsed ' ' ++
-        used ++ replicate usedToLives ' ' ++ lives ++ "\n\n" ++
-        livesIllustrations !! (mls-ls)
+    in concat [spaces, wordIndicator,
+               replicate spacesFromWordToUsed ' ',
+               usedIndicator, replicate spacesFromUsedToLives ' ',
+               livesIndicator, "\n\n",
+               livesIllustrations !! (maxLives-lives)
+         ]
     where
       replaceWith cs char c
         | c `elem` cs = c
         | otherwise   = char
 
--- We have to replace every letter of the word that appears in chr with _!
+data GameResult = Won | Lost | NotWon
 
--- The player is given 10 lives.
+-- Game defaults
+defaultLives       = 10
+startingGameState word = GameState { theWord = word
+                                   , guesses = []
+                                   , lives = defaultLives
+                                   , maxLives = defaultLives }
 
--- This is the loop that runs with state!
--- We can simply output the number of lives left, as a simple way around drawing
--- the whole stickman figure.
 --
+-- This is the loop that runs with state!
 -- 1) Repeatedly show prompt for 1 character only.
 -- 2) If this is okay, add it into the list of guesses.
 -- 3) If there were matches (elem) then do not decrement lives.
@@ -67,29 +73,28 @@ runHangman :: Hangman ()
 runHangman = do
 
   -- Read state and show the game status
-  gs@GameState {theWord=word,guesses=chrs,lives=ls} <- get
+  gs@GameState {theWord,guesses,lives} <- get
   liftIO $ print gs
 
   -- Keep asking the user for a single character.
-  inChar <- liftIO $ msum $ repeat retrieveChar
+  inputChar <- liftIO $ msum $ repeat retrieveChar
   liftIO $ putStr "\n\n"
 
-  -- Reduce lives if guess was not in the word
-  let ls' = if inChar `elem` word && not (inChar `elem` chrs)
-              then ls
-              else ls - 1
+  -- Decrement lives only if guess was not in the word
+  let updateLives = if inputChar `elem` theWord
+                    && not (inputChar `elem` guesses) then id else pred
 
   -- Put state
-  let gs' = gs {guesses=chrs `union` [inChar],lives=ls'}
+  let gs' = gs {guesses=guesses `union` [inputChar],lives=updateLives lives}
   put gs'
 
   case gameResult gs' of
     Won  -> liftIO $ do
       print gs'
-      putStr $ wonMessage $ show word
+      putStr $ wonMessage $ show theWord
     Lost -> liftIO $ do
       print gs'
-      putStr $ lostMessage $ show word
+      putStr $ lostMessage $ show theWord
     _    -> runHangman             -- neither won or lost. Continue.
 
   where
@@ -103,26 +108,24 @@ runHangman = do
           mzero -- failure state
 
     gameResult :: GameState -> GameResult
-    gameResult gs@GameState {theWord=word,guesses=chrs,lives=ls} =
-      if all (`elem` chrs) word
+    gameResult gs@GameState {theWord,guesses,lives} =
+      if all (`elem` guesses) theWord
         then Won
-        else if ls < 1 then Lost else NotWon
+        else if lives < 1 then Lost else NotWon
 
 -- At the beginning of the game, I pick a word randomly from a list of words.
 -- I have a game
 main :: IO ()
 main = do
-  wrds <- getWords "res/words.txt"
-  (ranIdx,_) <- newStdGen >>= return . randomR (0,length wrds)
-  let chosenWord = wrds !! ranIdx
+  listOfWords <- getWords "res/words.txt"
+  (randomIndex,_) <- newStdGen >>= return . randomR (0,length listOfWords)
+  let chosenWord = listOfWords !! randomIndex
   putStrLn introMessage
   putStr "\n\n"
-  _ <- execStateT runHangman $ defaultGameState chosenWord
+  _ <- execStateT runHangman $ startingGameState chosenWord
   return ()
   where
     getWords filePath  = readFile filePath >>= return . concatMap words . lines
-    defaultLives       = 10
-    defaultGameState w = GameState w [] defaultLives defaultLives
 
 introMessage = unlines [
   "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",
@@ -135,7 +138,7 @@ introMessage = unlines [
 wonMessage theWord = unlines [
   "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",
   "Congratulations, you've won!! You're so smart!",
-  "The word was " ++ theWord ++ " -- how did you guess?!?"
+  "The word was " ++ theWord ++ " -- HOW DID YOU KNOW?!?"
   ]
 
 lostMessage theWord = unlines [
