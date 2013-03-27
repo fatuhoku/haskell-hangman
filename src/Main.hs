@@ -87,14 +87,10 @@ runHangman = do
   case gameResult gs' of
     Won  -> liftIO $ do
       print gs'
-      putStr "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n"
-      putStr "Congratulations, you've won!! You're so smart!\n"
-      putStr $ "The word was " ++ show word ++ " -- how did you guess?!?\n"
+      putStr $ wonMessage $ show word
     Lost -> liftIO $ do
       print gs'
-      putStr "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n"
-      putStr "POOR YOU! You've LOST! You're such a dumbass!\n"
-      putStr $ "The word was " ++ show word ++ ".\n"
+      putStr $ lostMessage $ show word
     _    -> runHangman             -- neither won or lost. Continue.
 
   where
@@ -118,11 +114,7 @@ main = do
   wrds <- getWords "res/words.txt"
   (ranIdx,_) <- newStdGen >>= return . randomR (0,length wrds)
   let chosenWord = wrds !! ranIdx
-  putStr "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n"
-  putStr "!                 Hok's Hangman                   !\n"
-  putStr "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n"
-  putStr "Welcome to the gallows..."
-  putStr "You'd better get the word right, or else Mr. Stick gets it."
+  putStrLn introMessage
   putStr "\n\n"
   _ <- execStateT runHangman $ defaultGameState chosenWord
   return ()
@@ -130,6 +122,26 @@ main = do
     getWords filePath  = readFile filePath >>= return . concatMap words . lines
     defaultLives       = 10
     defaultGameState w = GameState w [] defaultLives defaultLives
+
+introMessage = unlines [
+  "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",
+  "!                 Hok's Hangman                   !",
+  "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",
+  "Welcome to the gallows...",
+  "You'd better get the word right, or else Mr. Stick gets it."
+  ]
+
+wonMessage theWord = unlines [
+  "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",
+  "Congratulations, you've won!! You're so smart!",
+  "The word was " ++ theWord ++ " -- how did you guess?!?"
+  ]
+
+lostMessage theWord = unlines [
+  "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",
+  "POOR YOU! You've LOST! You're such a dumbass!",
+  "The word was " ++ theWord ++ "."
+  ]
 
 livesIllustrations = [lives10,lives9,lives8,
                       lives7,lives6,lives5,
