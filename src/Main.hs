@@ -118,14 +118,14 @@ runHangman = do
 main :: IO ()
 main = do
   listOfWords <- getWords "res/words.txt"
-  (randomIndex,_) <- newStdGen >>= return . randomR (0,length listOfWords)
+  (randomIndex,_) <- return . randomR (0,length listOfWords) =<< newStdGen 
   let chosenWord = listOfWords !! randomIndex
   putStrLn introMessage
   putStr "\n\n"
   _ <- execStateT runHangman $ startingGameState chosenWord
   return ()
   where
-    getWords filePath  = readFile filePath >>= return . concatMap words . lines
+    getWords filePath = return . concatMap words . lines =<< readFile filePath
 
 introMessage = unlines [
   "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",
