@@ -10,23 +10,6 @@ import Data.List.HT
 
 type Hangman a = StateT GameState IO a
 
--- TODO lookup the definition of the chosen word from an online dictionary,
---      display it at the end of the game, thereby justifying the way that he
---      program tends to call the user a nasty name.
---      LINK: http://services.aonaware.com/DictService/DictService.asmx
---      This looks like this will involve a bit of SOAP. What fun.
---
--- TODO lookup nasty names from the internet to call the user if they lose.
-
--- Holds a list of true and false values for which the player had already
--- guessed those letters correctly.
---
--- TODO do a total variation of Hangman, which is based on messing around with
---      webservices: find a random word from the database, search and grab an
---      image from Yahoo! images; get the URL and put it into an ASCII-art
---      webservice to convert it into ASCII characters. Present the output to
---      the user to make them recognise what is in the picture.
-
 data GameState = GameState
   { theWord  :: String     -- TODO should be in Reader monad
   , guesses  :: [Char]     -- which characters have been guessed
