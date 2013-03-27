@@ -70,8 +70,7 @@ runHangman = do
   gs@GameState {theWord=word,guesses=chrs,lives=ls} <- get
   liftIO $ print gs
 
-  -- Validate user input for one character only
-  -- Once validated, this constitutes a guess.
+  -- Keep asking the user for a single character.
   inChar <- liftIO $ msum $ repeat retrieveChar
   liftIO $ putStr "\n\n"
 
@@ -94,13 +93,15 @@ runHangman = do
     _    -> runHangman             -- neither won or lost. Continue.
 
   where
+    -- Asks user for one character only.
     retrieveChar = do
       inLine <- getLine
       if length inLine == 1
         then return $ head inLine
         else do
-          putStr "Please enter a single character only. Try again.\n"
-          mzero
+          putStrLn "Please enter a single character only. Try again."
+          mzero -- failure state
+
     gameResult :: GameState -> GameResult
     gameResult gs@GameState {theWord=word,guesses=chrs,lives=ls} =
       if all (`elem` chrs) word
