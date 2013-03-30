@@ -19,12 +19,16 @@ Maintainer:          Hok Shun Poon <fushunpoon _ gmail _ com>
 Copyright:           (c) 2012 Hok Shun Poon
 Category:            Game
 Build-type:          Simple
+Cabal-version:       >=1.6
+
+Source-Repository head
+  type:     git
+  location: https://github.com/fushunpoon/haskell-hangman
 
 -- Extra files to be distributed with the package, such as examples or
 -- a README.
 -- Extra-source-files:  
 
-Cabal-version:       >=1.2
 
 Executable hangman
   -- Specify the source directory here
@@ -34,7 +38,7 @@ Executable hangman
   Main-is:             Main.hs
   
   -- Packages needed in order to build this package.
-  Build-depends:       base>4, mtl, random, utility-ht
+  Build-depends:       base >= 2 && < 4, mtl, random, utility-ht
   
   -- Modules not exported by this package.
   -- Other-modules:       
