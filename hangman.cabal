@@ -1,5 +1,5 @@
 Name:                hangman
-Version:             1.0
+Version:             1.0.1
 
 Synopsis:            Hangman implementation in Haskell written in two hours.
 Description:
