@@ -63,16 +63,9 @@ Fork this project and contribute by submitting a Pull Request!
 Though I usually advocate TDD, there are no tests in this project at the
 moment. You can help me add some!
 
-## Thanks
 
-[TODO INSERT THANKS HERE]
-
-## See also
-
-[TODO INSERT LINKS HERE]
-
-[1]: http://www.haskell.org/cabal Haskell Cabal
-[2]: https://github.com/creswick/cabal-dev/blob/master/README.md Cabal-dev README
-[3]: http://hackage.haskell.org/ Hackage
-[4]: http://www.haskell.org/haskellwiki/Haskell Haskell
-[5]: http://www.haskell.org/haskellwiki/Cabal-Install Cabal Install
+[1]: http://www.haskell.org/cabal "Haskell Cabal"
+[2]: https://github.com/creswick/cabal-dev/blob/master/README.md "Cabal-dev README"
+[3]: http://hackage.haskell.org/ "Hackage"
+[4]: http://www.haskell.org/haskellwiki/Haskell "Haskell"
+[5]: http://www.haskell.org/haskellwiki/Cabal-Install "Cabal Install"
