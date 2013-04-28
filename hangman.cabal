@@ -1,5 +1,5 @@
 Name:                hangman
-Version:             1.0.1
+Version:             1.0.3
 
 Synopsis:            Hangman implementation in Haskell written in two hours.
 Description:
@@ -20,6 +20,8 @@ Copyright:           (c) 2012 Hok Shun Poon
 Category:            Game
 Build-type:          Simple
 Cabal-version:       >=1.6
+Data-dir:            src/main/resources
+Data-files:          words.txt
 
 Source-Repository head
   type:     git
@@ -29,10 +31,9 @@ Source-Repository head
 -- a README.
 -- Extra-source-files:  
 
-
 Executable hangman
   -- Specify the source directory here
-  Hs-source-dirs:      src
+  Hs-source-dirs:      src/main/haskell
 
   -- .hs or .lhs file containing the Main module.
   Main-is:             Main.hs
