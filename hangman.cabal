@@ -14,8 +14,8 @@ Description:
 
 License:             MIT
 License-file:        LICENSE
-Author:              Hok Shun Poon <fushunpoon _ gmail _ com>
-Maintainer:          Hok Shun Poon <fushunpoon _ gmail _ com>
+Author:              Hok Shun Poon <hok@hokshunpoon.me>
+Maintainer:          Hok Shun Poon <hok@hokshunpoon.me>
 Copyright:           (c) 2012 Hok Shun Poon
 Category:            Game
 Build-type:          Simple
@@ -38,7 +38,7 @@ Executable hangman
   Main-is:             Main.hs
   
   -- Packages needed in order to build this package.
-  Build-depends:       base >= 2 && < 4, mtl, random, utility-ht
+  Build-depends:       base >= 2 && < 5, mtl, random, utility-ht
   
   -- Modules not exported by this package.
   -- Other-modules:       
