@@ -7,7 +7,6 @@ import Control.Monad.Trans
 import Control.Monad.State.Lazy
 import Data.List
 import Data.List.HT
-import Paths_hangman
 
 type Hangman a = StateT GameState IO a
 
@@ -100,7 +99,7 @@ runHangman = do
 -- At the beginning of the game, I pick a word randomly from a list of words.
 main :: IO ()
 main = do
-  listOfWords <- getWords =<< (getDataFileName "words.txt")
+  listOfWords <- undefined
   (randomIndex,_) <- return . randomR (0,length listOfWords) =<< newStdGen 
   let chosenWord = listOfWords !! randomIndex
   putStrLn introMessage
