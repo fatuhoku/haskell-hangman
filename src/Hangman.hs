@@ -1,14 +1,15 @@
 {-# LANGUAGE NamedFieldPuns #-}
-module Main where
+module Hangman
+    ( runHangman
+    ) where
 
-import System.Random
+import qualified Control.Monad.State.Lazy as MTL
+import qualified System.Random as R
 
-import Control.Monad.Trans
-import Control.Monad.State.Lazy
 import Data.List
 import Data.List.HT
 
-type Hangman a = StateT GameState IO a
+type Hangman a = MTL.StateT GameState IO a
 
 data GameState = GameState
   { theWord  :: String     -- TODO should be in Reader monad
@@ -18,7 +19,7 @@ data GameState = GameState
   }
 
 instance Show GameState where
-  show (GameState {theWord,guesses,lives,maxLives}) =
+  show GameState {theWord,guesses,lives,maxLives} =
     let wordIndicator = map (replaceWith guesses '_') theWord;
         usedIndicator  = "Guessed: {" ++ guesses ++ "}";
         livesIndicator = "Lives:   [" ++ replicate lives 'I' ++ "]"
@@ -45,40 +46,40 @@ startingGameState word = GameState { theWord = word
                                    , lives = defaultLives
                                    , maxLives = defaultLives }
 
---
+                                   --
 -- This is the loop that runs with state!
 -- 1) Repeatedly show prompt for 1 character only.
 -- 2) If this is okay, add it into the list of guesses.
 -- 3) If there were matches (elem) then do not decrement lives.
 -- 4) Check whether the player has won.
 --
-runHangman :: Hangman ()
-runHangman = do
+mainLoop :: Hangman ()
+mainLoop = do
 
   -- Read state and show the game status
-  gs@GameState {theWord,guesses,lives} <- get
-  liftIO $ print gs
+  gs@GameState {theWord,guesses,lives} <- MTL.get
+  MTL.liftIO $ print gs
 
   -- Keep asking the user for a single character.
-  inputChar <- liftIO $ msum $ repeat retrieveChar
-  liftIO $ putStr "\n\n"
+  inputChar <- MTL.liftIO $ MTL.msum $ repeat retrieveChar
+  MTL.liftIO $ putStr "\n\n"
 
   -- Decrement lives only if guess was not in the word
   let updateLives = if inputChar `elem` theWord
-                    && not (inputChar `elem` guesses) then id else pred
+                    && notElem inputChar guesses then id else pred
 
   -- Put state
   let gs' = gs {guesses=guesses `union` [inputChar],lives=updateLives lives}
-  put gs'
+  MTL.put gs'
 
   case gameResult gs' of
-    Won  -> liftIO $ do
+    Won  -> MTL.liftIO $ do
       print gs'
       putStr $ wonMessage $ show theWord
-    Lost -> liftIO $ do
+    Lost -> MTL.liftIO $ do
       print gs'
       putStr $ lostMessage $ show theWord
-    _    -> runHangman             -- neither won or lost. Continue.
+    _    -> mainLoop             -- neither won or lost. Continue.
 
   where
     -- Asks user for one character only.
@@ -88,26 +89,25 @@ runHangman = do
         then return $ head inLine
         else do
           putStrLn "Please enter a single character only. Try again."
-          mzero -- failure state
+          MTL.mzero -- failure state
 
     gameResult :: GameState -> GameResult
-    gameResult gs@GameState {theWord,guesses,lives} =
-      if all (`elem` guesses) theWord
-        then Won
-        else if lives < 1 then Lost else NotWon
+    gameResult gs@GameState {theWord,guesses,lives}
+     | all (`elem` guesses) theWord = Won
+     | lives < 1 = Lost
+     | otherwise = NotWon
 
--- At the beginning of the game, I pick a word randomly from a list of words.
-main :: IO ()
-main = do
-  listOfWords <- undefined
-  (randomIndex,_) <- return . randomR (0,length listOfWords) =<< newStdGen 
-  let chosenWord = listOfWords !! randomIndex
+runHangman :: IO ()
+runHangman = do
+  allWords <- getWords "res/words.txt" -- TODO Add more words
+  (randomIndex,_) <- R.randomR (0,length allWords) <$> R.newStdGen 
+  let chosenWord = allWords !! randomIndex
   putStrLn introMessage
   putStr "\n\n"
-  _ <- execStateT runHangman $ startingGameState chosenWord
+  _ <- MTL.execStateT mainLoop $ startingGameState chosenWord
   return ()
   where
-    getWords filePath = return . concatMap words . lines =<< readFile filePath
+    getWords filePath = concatMap words . lines <$> readFile filePath
 
 introMessage = unlines [
   "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",
@@ -119,14 +119,15 @@ introMessage = unlines [
 
 wonMessage theWord = unlines [
   "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",
-  "Congratulations, you've won!! You're so smart!",
+  "Congratulations, YOU GOT IT!! You're so smart!",
   "The word was " ++ theWord ++ " -- HOW DID YOU KNOW?!?"
   ]
 
+lostMessage :: [Char] -> String
 lostMessage theWord = unlines [
   "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",
-  "POOR YOU! You've LOST! You're such a dumbass!",
-  "The word was " ++ theWord ++ "."
+  "Oh dear, YOU LOST!! Mr. Stick couldn't be saved :(",
+  "The word was " ++ theWord ++ ". Better luck next time ;)"
   ]
 
 livesIllustrations = [lives10,lives9,lives8,
@@ -221,4 +222,3 @@ theEnd  = "-----------  \n" ++
           " |    / \\    \n" ++
           " |           \n" ++
           "-------------\n"
-

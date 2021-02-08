@@ -1,48 +1,72 @@
-Name:                hangman
-Version:             1.0.3
+cabal-version: 1.12
 
-Synopsis:            Hangman implementation in Haskell written in two hours.
-Description:
-  A command line implementation of the classic hangman game.
-  I wrote this when I was desperately bored during exam revision period
-  in a couple of hours.
-  
-  Hopefully you will find the implementation to be of use. It sort of began as
-  an assessment of the Haskell development experience, but I plan to continue
-  to maintain and extend the implementation to demonstrate how to apply good
-  software development practises to Haskell code.
+-- This file has been generated from package.yaml by hpack version 0.33.0.
+--
+-- see: https://github.com/sol/hpack
+--
+-- hash: 84e65448281260af3e65595ba815c59e3dd434a986d2b0148c599c96e33d7aae
 
-License:             MIT
-License-file:        LICENSE
-Author:              Hok Shun Poon <hok@hokshunpoon.me>
-Maintainer:          Hok Shun Poon <hok@hokshunpoon.me>
-Copyright:           (c) 2012 Hok Shun Poon
-Category:            Game
-Build-type:          Simple
-Cabal-version:       >=1.6
-Data-dir:            src/main/resources
-Data-files:          words.txt
+name:           hangman
+version:        0.9.0.0
+synopsis:       A classic game implemented in Haskell
+description:    Please see the README on GitHub at <https://github.com/fatuhoku/haskell-hangman#readme>
+category:       Game
+homepage:       https://github.com/fatuhoku/haskell-hangman#readme
+bug-reports:    https://github.com/fatuhoku/haskell-hangman/issues
+author:         Hok Shun Poon
+copyright:      2021 Hok Shun Poon
+license:        MIT
+license-file:   LICENSE
+build-type:     Simple
+extra-source-files:
+    README.md
+    ChangeLog.md
 
-Source-Repository head
-  type:     git
-  location: https://github.com/fushunpoon/haskell-hangman
+source-repository head
+  type: git
+  location: https://github.com/fatuhoku/haskell-hangman
 
--- Extra files to be distributed with the package, such as examples or
--- a README.
--- Extra-source-files:  
+library
+  exposed-modules:
+      Hangman
+  other-modules:
+      Paths_hangman
+  hs-source-dirs:
+      src
+  build-depends:
+      base >=4.7 && <5
+    , mtl
+    , random
+    , utility-ht
+  default-language: Haskell2010
 
-Executable hangman
-  -- Specify the source directory here
-  Hs-source-dirs:      src/main/haskell
+executable hangman-exe
+  main-is: Main.hs
+  other-modules:
+      Paths_hangman
+  hs-source-dirs:
+      app
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      base >=4.7 && <5
+    , hangman
+    , mtl
+    , random
+    , utility-ht
+  default-language: Haskell2010
 
-  -- .hs or .lhs file containing the Main module.
-  Main-is:             Main.hs
-  
-  -- Packages needed in order to build this package.
-  Build-depends:       base >= 2 && < 5, mtl, random, utility-ht
-  
-  -- Modules not exported by this package.
-  -- Other-modules:       
-  
-  -- Extra tools (e.g. alex, hsc2hs, ...) needed to build the source.
-  -- Build-tools:         
+test-suite hangman-test
+  type: exitcode-stdio-1.0
+  main-is: Spec.hs
+  other-modules:
+      Paths_hangman
+  hs-source-dirs:
+      test
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      base >=4.7 && <5
+    , hangman
+    , mtl
+    , random
+    , utility-ht
+  default-language: Haskell2010
