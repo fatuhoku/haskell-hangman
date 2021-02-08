@@ -3,5 +3,5 @@
 *.swp
 *.tmp
 .*
-dist/
+dist*
 cabal-dev/
